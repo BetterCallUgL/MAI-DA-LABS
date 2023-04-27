@@ -140,58 +140,70 @@ void NodeInsert(Btree* tree, char* key, unsigned long long value) {
     }
 }
 
-
 // удаление:
-void DeleteLeaf(node* current_node, int index){
-    for (int i = index + 1; i < current_node->size;++i){
+void DeleteLeaf(node* current_node, int index) {
+    for (int i = index + 1; i < current_node->size; ++i) {
         current_node->keys[i - 1] = current_node->keys[i];
-        current_node->values[i - 1] = current_node->values[i]; 
+        current_node->values[i - 1] = current_node->values[i];
     }
     current_node->size--;
 }
 
-char* TheBiggest(node* current_node, int index){
+char* TheBiggest(node* current_node, int index) {
     node* tmp = current_node->childs[index];
-    while (tmp->is_leaf == false){
+    while (tmp->is_leaf == false) {
         tmp = tmp->childs[tmp->size];
     }
 
     return tmp->keys[tmp->size - 1];
 }
 
-char* TheSmallest(node* current_node, int index){
+char* TheSmallest(node* current_node, int index) {
     node* tmp = current_node->childs[index + 1];
-    while(tmp->is_leaf == false){
+    while (tmp->is_leaf == false) {
         tmp = tmp->childs[0];
     }
     return tmp->keys[0];
 }
 
-void merge(node* current_node,void){
+void Merge(node* current_node, int index, int t) {
+    node* left_child = current_node->childs[index];
+    node* right_child = current_node->childs[index + 1];
 
+    left_child->keys[t - 1] = current_node->keys[index];
+    left_child->values[t - 1] = current_node->values[index];
+
+    for (int i = 0; i < right_child->size; ++i) {
+        left_child->keys[i+t] = right_child->keys[i];
+        left_child->values[i+t] = right_child->values[i];
+    }
+
+    if (left_child->is_leaf == false){
+        for (int i = 0; i <= right_child->size; i++){
+            left_child->childs[i]
+        }
+    }
 }
 
-void DeleteNotLeaf(node* current_node, int index, int t){
+void DeleteNotLeaf(node* current_node, int index, int t) {
     char* key = current_node->keys[index];
 
     // если у кого-то из детей > t - 1
     if (current_node->childs[index]->size > t - 1) {
         char* biggest_key = TheBiggest(current_node, index);
-        strncpy(current_node->keys[index],biggest_key,strlen(biggest_key));
-        Delete(current_node->childs[index],biggest_key,t);
+        strncpy(current_node->keys[index], biggest_key, strlen(biggest_key));
+        Delete(current_node->childs[index], biggest_key, t);
 
-    } else if (current_node->childs[index + 1]->size > t - 1){
-        char* smallest_key = TheSmallest(current_node,index);
-        strncpy(current_node->keys[index],smallest_key,strlen(smallest_key));
-        Delete(current_node->childs[index], smallest_key,t);
+    } else if (current_node->childs[index + 1]->size > t - 1) {
+        char* smallest_key = TheSmallest(current_node, index);
+        strncpy(current_node->keys[index], smallest_key, strlen(smallest_key));
+        Delete(current_node->childs[index], smallest_key, t);
 
     } else {
-        Merge(current_node,index,t);
-        remove(current_node->childs[index],key,t);
+        Merge(current_node, index, t);
+        Delete(current_node->childs[index], key, t);
     }
 }
-
-
 
 void Delete(node* root, char* key, int t) {
     bool in_node = false;
@@ -202,13 +214,12 @@ void Delete(node* root, char* key, int t) {
             node_index = index;
         }
     }
-    if (in_node){
-        if (root->is_leaf){
+    if (in_node) {
+        if (root->is_leaf) {
             DeleteLeaf(root, node_index);
         } else {
             DeleteNotLeaf(root, node_index, t);
         }
     } else {
-        
     }
 }
