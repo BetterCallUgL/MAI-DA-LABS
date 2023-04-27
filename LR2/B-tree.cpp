@@ -140,22 +140,75 @@ void NodeInsert(Btree* tree, char* key, unsigned long long value) {
     }
 }
 
+
+// удаление:
+void DeleteLeaf(node* current_node, int index){
+    for (int i = index + 1; i < current_node->size;++i){
+        current_node->keys[i - 1] = current_node->keys[i];
+        current_node->values[i - 1] = current_node->values[i]; 
+    }
+    current_node->size--;
+}
+
+char* TheBiggest(node* current_node, int index){
+    node* tmp = current_node->childs[index];
+    while (tmp->is_leaf == false){
+        tmp = tmp->childs[tmp->size];
+    }
+
+    return tmp->keys[tmp->size - 1];
+}
+
+char* TheSmallest(node* current_node, int index){
+    node* tmp = current_node->childs[index + 1];
+    while(tmp->is_leaf == false){
+        tmp = tmp->childs[0];
+    }
+    return tmp->keys[0];
+}
+
+void merge(node* current_node,void){
+
+}
+
+void DeleteNotLeaf(node* current_node, int index, int t){
+    char* key = current_node->keys[index];
+
+    // если у кого-то из детей > t - 1
+    if (current_node->childs[index]->size > t - 1) {
+        char* biggest_key = TheBiggest(current_node, index);
+        strncpy(current_node->keys[index],biggest_key,strlen(biggest_key));
+        Delete(current_node->childs[index],biggest_key,t);
+
+    } else if (current_node->childs[index + 1]->size > t - 1){
+        char* smallest_key = TheSmallest(current_node,index);
+        strncpy(current_node->keys[index],smallest_key,strlen(smallest_key));
+        Delete(current_node->childs[index], smallest_key,t);
+
+    } else {
+        Merge(current_node,index,t);
+        remove(current_node->childs[index],key,t);
+    }
+}
+
+
+
 void Delete(node* root, char* key, int t) {
     bool in_node = false;
-    int key_index;
+    int node_index;
     for (int index = 0; index < root->size; ++index) {
         if (!strcmp(root->keys[index], key)) {
             in_node = true;
-            key_index = index;
+            node_index = index;
         }
     }
     if (in_node){
         if (root->is_leaf){
-            DeleteLeaf(index);
+            DeleteLeaf(root, node_index);
         } else {
-            DeleteNotLeaf(index);
+            DeleteNotLeaf(root, node_index, t);
         }
     } else {
-
+        
     }
 }

@@ -18,5 +18,6 @@ typedef struct Btree{
 void InitTree(Btree* tree, int number);
 void NodeInsert(Btree* tree, char* key, unsigned long long value);
 unsigned long long search(node* root, char* key);
+void Delete(node* root, char* key, int t);
 
 #endif
