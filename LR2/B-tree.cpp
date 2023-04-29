@@ -88,11 +88,11 @@ void FreeInsert(node* current_node, char* key, unsigned long long value, int t) 
     }
 }
 
-unsigned long long search(node* root, char* key) {
+unsigned long long Search(node* root, char* key) {
     if (root->is_leaf == false && More(root->keys[0], key)) {
-        return search(root->childs[0], key);
+        return Search(root->childs[0], key);
     } else if (root->is_leaf == false && More(key, root->keys[root->size - 1])) {
-        return search(root->childs[root->size], key);
+        return Search(root->childs[root->size], key);
     } else {
         for (int i = 0; i < root->size; ++i) {
             if (!strcmp(key, root->keys[i])) {
@@ -100,11 +100,11 @@ unsigned long long search(node* root, char* key) {
             }
             if (root->is_leaf == false && root->size > 1 && More(key, root->keys[i]) &&
                 More(root->keys[i + 1], key)) {
-                return search(root->childs[i + 1], key);
+                return Search(root->childs[i + 1], key);
             }
         }
     }
-    return -1;
+    return 0;
 }
 
 void NodeInsert(Btree* tree, char* key, unsigned long long value) {
@@ -267,7 +267,7 @@ void RightSteal(node* current_node, int index) {
     child_to_put->size += 1;
 }
 
-void fill(node* current_node, int index, int t) {
+void Fill(node* current_node, int index, int t) {
     if (index != 0 && current_node->childs[index - 1]->size > t - 1) {
         LeftSteal(current_node, index);
     } else if (index != current_node->size && current_node->childs[index + 1]->size > t - 1) {
@@ -295,7 +295,7 @@ void Delete(node* root, char* key, int t) {
         }
     } else {
         if (root->childs[node_index]->size == t - 1) {
-            fill(root, node_index, t);
+            Fill(root, node_index, t);
         }
 
         if (node_index > root->size) {

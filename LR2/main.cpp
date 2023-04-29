@@ -19,14 +19,14 @@ int main() {
             for (int i = 0; i < strlen(key); i++) {
                 key[i] = tolower(key[i]);
             }
-            if (search(tree->root, key) != -1) {
+            if (Search(tree->root, key) != 0) {
                 printf("Exist\n");
             } else {
                 NodeInsert(tree, key, value);
                 printf("OK\n");
             }
-        }
-        if (!strcmp(buffer, "print")) {
+
+        } else if (!strcmp(buffer, "print")) {
             for (int j = 0; j < tree->root->childs[0]->size; j++) {
                 printf("\t%s %lld\n", tree->root->childs[0]->keys[j], tree->root->childs[0]->values[j]);
             }
@@ -36,6 +36,24 @@ int main() {
                     printf("\t%s %lld\n", tree->root->childs[i + 1]->keys[j],
                            tree->root->childs[i + 1]->values[j]);
                 }
+            }
+        }else if (!strcmp(buffer,"-")) {
+            char key[256];
+            cin >> key;
+            for (int i = 0; i < strlen(key); i++) {
+                key[i] = tolower(key[i]);
+            }
+            if (Search(tree->root,key) == 0){
+                printf("NoSuchWord\n");
+            } else {
+                Delete(tree->root,key,tree->t);
+            }
+        } else {
+            unsigned long long value = Search(tree->root, buffer);
+            if (value == 0){
+                printf("NoSuchWord\n");
+            } else {
+                printf("Ok: %lld\n",value);
             }
         }
     }
