@@ -193,6 +193,8 @@ int binarySearch(vector<Point> points, int targetX) {
 }
 
 int main() {
+  ios_base::sync_with_stdio(false);
+  cin.tie(NULL);
   srand(time(0));
   vector<Point> points;
   int n, m;
