@@ -6,7 +6,7 @@
 #include <vector>
 
 struct Node {
-  int key, prior, size;
+  int key, prior, size, copy;
   Node *left, *right;
 };
 
@@ -17,66 +17,6 @@ int Size(Node* root) {
     return 0;
   } else {
     return root->size;
-  }
-}
-
-pair<Node*, Node*> split(Node* root, int key) {
-  if (!root) {
-    return {NULL, NULL};
-  } else if (key < root->key) {
-    pair<Node*, Node*> q = split(root->left, key);
-    Node* r = (Node*)malloc(sizeof(Node));
-    r->right = root->right;
-    r->key = root->key;
-    r->prior = root->prior;
-    r->left = q.second;
-    r->size = Size(r->right) + Size(r->left) + 1;
-    return {q.first, r};
-  } else {
-    pair<Node*, Node*> q = split(root->right, key);
-    Node* l = (Node*)malloc(sizeof(Node));
-    l->left = root->left;
-    l->key = root->key;
-    l->prior = root->prior;
-    l->right = q.first;
-    l->size = Size(l->left) + Size(l->right) + 1;
-    return {l, q.second};
-  }
-}
-
-void insert(Node* root, int key, int prior, Node** newRoot) {
-  *newRoot = (Node*)malloc(sizeof(Node));
-
-  if (!root || prior > root->prior) {
-    pair<Node*, Node*> q = split(root, key);
-    (*newRoot)->left = q.first;
-    (*newRoot)->right = q.second;
-    (*newRoot)->key = key;
-    (*newRoot)->prior = prior;
-    (*newRoot)->size = Size(q.first) + Size(q.second) + 1;
-    return;
-  }
-
-  (*newRoot)->key = root->key;
-  (*newRoot)->prior = root->prior;
-  (*newRoot)->size = root->size + 1;
-  if (key < root->key) {
-    (*newRoot)->right = root->right;
-    insert(root->left, key, prior, &((*newRoot)->left));
-  } else {
-    (*newRoot)->left = root->left;
-    insert(root->right, key, prior, &((*newRoot)->right));
-  }
-}
-
-void debug_print_helper(Node* v, int indent) {
-  if (v) {
-    if (indent) {
-      cout << setw(indent) << " ";
-    }
-    cout << v->key << ":" << v->prior << ":" << v->size << "\n";
-    debug_print_helper(v->left, indent + 4);
-    debug_print_helper(v->right, indent + 4);
   }
 }
 
@@ -92,6 +32,103 @@ Node* search(Node* root, int key) {
   }
 }
 
+pair<Node*, Node*> split(Node* root, int key) {
+  if (!root) {
+    return {NULL, NULL};
+  } else if (key < root->key) {
+    pair<Node*, Node*> q = split(root->left, key);
+    Node* r = (Node*)calloc(1, sizeof(Node));
+    r->right = root->right;
+    r->key = root->key;
+    r->prior = root->prior;
+    r->copy = root->copy;
+    r->left = q.second;
+    r->size = Size(r->right) + Size(r->left) + 1 + r->copy;
+    return {q.first, r};
+  } else {
+    pair<Node*, Node*> q = split(root->right, key);
+    Node* l = (Node*)calloc(1, sizeof(Node));
+    l->left = root->left;
+    l->key = root->key;
+    l->prior = root->prior;
+    l->copy = root->copy;
+    l->right = q.first;
+    l->size = Size(l->left) + Size(l->right) + 1 + l->copy;
+    return {l, q.second};
+  }
+}
+
+void insert_help(Node* root, int key, int prior, Node** newRoot) {
+  *newRoot = (Node*)calloc(1, sizeof(Node));
+
+  if (!root || prior > root->prior) {
+    pair<Node*, Node*> q = split(root, key);
+    (*newRoot)->left = q.first;
+    (*newRoot)->right = q.second;
+    (*newRoot)->key = key;
+    (*newRoot)->prior = prior;
+    (*newRoot)->size = Size(q.first) + Size(q.second) + 1;
+    return;
+  }
+
+  (*newRoot)->key = root->key;
+  (*newRoot)->prior = root->prior;
+  (*newRoot)->size = root->size + 1;
+  (*newRoot)->copy = root->copy;
+  if (key < root->key) {
+    (*newRoot)->right = root->right;
+    insert_help(root->left, key, prior, &((*newRoot)->left));
+  } else {
+    (*newRoot)->left = root->left;
+    insert_help(root->right, key, prior, &((*newRoot)->right));
+  }
+}
+
+void insert_copy(Node* root, int key, Node** newRoot) {
+  *newRoot = (Node*)calloc(1, sizeof(Node));
+  if (root->key == key) {
+    (*newRoot)->left = root->left;
+    (*newRoot)->right = root->right;
+    (*newRoot)->key = key;
+    (*newRoot)->prior = root->prior;
+    (*newRoot)->copy = root->copy + 1;
+    (*newRoot)->size = root->size + 1;
+    return;
+  }
+
+  (*newRoot)->key = root->key;
+  (*newRoot)->prior = root->prior;
+  (*newRoot)->size = root->size + 1;
+  (*newRoot)->copy = root->copy;
+  if (key < root->key) {
+    (*newRoot)->right = root->right;
+    insert_copy(root->left, key, &((*newRoot)->left));
+  } else {
+    (*newRoot)->left = root->left;
+    insert_copy(root->right, key, &((*newRoot)->right));
+  }
+}
+
+void insert(Node* root, int key, int prior, Node** newRoot) {
+  if (!search(root, key)) {
+    insert_help(root, key, prior, newRoot);
+  } else {
+    insert_copy(root, key, newRoot);
+  }
+}
+
+void debug_print_helper(Node* v, int indent) {
+  if (v) {
+    if (indent) {
+      cout << setw(indent) << " ";
+    }
+    cout << v->key << ":" << v->prior << ":" << v->size << ":" << v->copy
+         << "\n";
+    debug_print_helper(v->left, indent + 4);
+    debug_print_helper(v->right, indent + 4);
+  }
+}
+
 Node* merge(Node* l, Node* r) {
   if (!l) {
     return r;
@@ -100,19 +137,23 @@ Node* merge(Node* l, Node* r) {
     return l;
   }
 
-  Node* newRoot = (Node*)malloc(sizeof(Node));
+  Node* newRoot = (Node*)calloc(1, sizeof(Node));
   if (l->prior > r->prior) {
     newRoot->key = l->key;
     newRoot->prior = l->prior;
     newRoot->left = l->left;
+    newRoot->copy = l->copy;
     newRoot->right = merge(l->right, r);
-    newRoot->size = Size(newRoot->left) + Size(newRoot->right) + 1;
+    newRoot->size =
+        Size(newRoot->left) + Size(newRoot->right) + 1 + newRoot->copy;
   } else {
     newRoot->key = r->key;
     newRoot->prior = r->prior;
     newRoot->right = r->right;
+    newRoot->copy = r->copy;
     newRoot->left = merge(l, r->left);
-    newRoot->size = Size(newRoot->left) + Size(newRoot->right) + 1;
+    newRoot->size =
+        Size(newRoot->left) + Size(newRoot->right) + 1 + newRoot->copy;
   }
 
   return newRoot;
@@ -124,10 +165,11 @@ void del_help(Node* root, int key, Node** newRoot) {
     return;
   }
 
-  *newRoot = (Node*)malloc(sizeof(Node));
+  *newRoot = (Node*)calloc(1, sizeof(Node));
   (*newRoot)->key = root->key;
   (*newRoot)->prior = root->prior;
   (*newRoot)->size = root->size - 1;
+  (*newRoot)->copy = root->copy;
   if (key < root->key) {
     (*newRoot)->right = root->right;
     del_help(root->left, key, &((*newRoot)->left));
@@ -137,13 +179,42 @@ void del_help(Node* root, int key, Node** newRoot) {
   }
 }
 
-void del(Node* root, int key, Node** newRoot) {
-  if (!search(root, key)) {
-    *newRoot = root;
+void del_copy(Node* root, int key, Node** newRoot) {
+  *newRoot = (Node*)calloc(1, sizeof(Node));
+  if (root->key == key) {
+    (*newRoot)->left = root->left;
+    (*newRoot)->right = root->right;
+    (*newRoot)->key = key;
+    (*newRoot)->prior = root->prior;
+    (*newRoot)->copy = root->copy - 1;
+    (*newRoot)->size = root->size - 1;
     return;
   }
 
-  del_help(root, key, newRoot);
+  (*newRoot)->key = root->key;
+  (*newRoot)->prior = root->prior;
+  (*newRoot)->size = root->size - 1;
+  (*newRoot)->copy = root->copy;
+  if (key < root->key) {
+    (*newRoot)->right = root->right;
+    del_copy(root->left, key, &((*newRoot)->left));
+  } else {
+    (*newRoot)->left = root->left;
+    del_copy(root->right, key, &((*newRoot)->right));
+  }
+}
+
+void del(Node* root, int key, Node** newRoot) {
+  Node* found = search(root, key);
+  if (!found) {
+    *newRoot = root;
+    return;
+  }
+  if (found->copy > 0) {
+    del_copy(root, key, newRoot);
+  } else {
+    del_help(root, key, newRoot);
+  }
 }
 
 struct Point {
@@ -171,7 +242,7 @@ int request(Node* root, int y) {
   if (root->key <= y) {
     return request(root->right, y);
   } else {
-    return 1 + Size(root->right) + request(root->left, y);
+    return Size(root->right) + request(root->left, y) + 1 + root->copy;
   }
 }
 
