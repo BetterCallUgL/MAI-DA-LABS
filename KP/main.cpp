@@ -178,6 +178,9 @@ int request(Node* root, int y) {
 int binarySearch(vector<Point> points, int targetX) {
   int left = -1;
   int right = points.size();
+  if (targetX < points[0].x || targetX > points[points.size() - 1].x) {
+    return -1;
+  }
 
   while (left + 1 < right) {
     int mid = left + (right - left) / 2;
