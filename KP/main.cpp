@@ -153,15 +153,51 @@ struct Point {
   Node* root;
 };
 
-bool comparePoints(Point a, Point b) { return a.x < b.x; }
+// int bSearch(vector<Point> a, int x) {}
+
+bool comparePoints(Point a, Point b) {
+  if (a.x != b.x) {
+    return a.x < b.x;
+  } else {
+    return a.type > b.type;
+  };
+}
+
+int request(Node* root, int y) {
+  if (!root) {
+    return 0;
+  }
+
+  if (root->key <= y) {
+    return request(root->right, y);
+  } else {
+    return 1 + Size(root->right) + request(root->left, y);
+  }
+}
+
+int binarySearch(vector<Point> points, int targetX, bool targetType) {
+  int left = -1;
+  int right = points.size();
+
+  while (left + 1 < right) {
+    int mid = left + (right - left) / 2;
+
+    if (points[mid].x <= targetX && (!targetType || points[mid].type)) {
+      left = mid;
+    } else {
+      right = mid;
+    }
+  }
+
+  return left;
+}
 
 int main() {
   srand(time(0));
   vector<Point> points;
   int n, m;
-  Node *prevRoot = NULL, *newRoot = NULL;
 
-  cin >> n;
+  cin >> n >> m;
   for (int i = 0; i < n; i++) {
     int x1, x2, y;
     cin >> x1 >> x2 >> y;
@@ -174,7 +210,7 @@ int main() {
 
   vector<Node*> treaps;
   Node *prevRoot = NULL, *newRoot = NULL;
-  for (int i = 0; i < n; i++) {
+  for (int i = 0; i < n * 2; i++) {
     if (points[i].type == true) {
       insert(prevRoot, points[i].y, rand(), &newRoot);
     } else {
@@ -184,13 +220,21 @@ int main() {
     prevRoot = newRoot;
   }
 
-  cin >> m;
-  int x,y;
+  int x, y;
   for (int i = 0; i < m; i++) {
     cin >> x >> y;
-    int index;
-    for (int j = 0; j < n; j++) {
-      if (points[j].x > 
-    }
+    int index = binarySearch(points, x, true);
+    // cout << i << "- " << points[index].x << ":" << points[index].y << ":"
+    //      << points[index].type << "\n";
+    cout << request(points[index].root, y) << "\n";
   }
+
+  // cout << "\n\nВСЕ ТОЧКИ\n\n";
+  // for (int i = 0; i < 2 * n; i++) {
+  //   cout << "\n\n";
+  //   cout << i << "- " << points[i].x << ":" << points[i].y << ":"
+  //        << points[i].type << "\n";
+  //   debug_print_helper(points[i].root, 0);
+  //   cout << "\n\n";
+  // }
 }
