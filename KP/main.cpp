@@ -209,8 +209,7 @@ int main() {
 
   sort(points.begin(), points.end(),
        [](const Point a, const Point& b) { return a.x < b.x; });
-
-  vector<Node*> treaps;
+  
   Node *prevRoot = NULL, *newRoot = NULL;
   for (int i = 0; i < n * 2; i++) {
     if (points[i].type == true) {
