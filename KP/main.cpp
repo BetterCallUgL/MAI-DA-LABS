@@ -209,13 +209,21 @@ int main() {
 
   sort(points.begin(), points.end(),
        [](const Point a, const Point& b) { return a.x < b.x; });
-  
+
+  vector<Point> unique_points;
   Node *prevRoot = NULL, *newRoot = NULL;
   for (int i = 0; i < n * 2; i++) {
     if (points[i].type == true) {
       insert(prevRoot, points[i].y, rand(), &newRoot);
     } else {
       del(prevRoot, points[i].y, &newRoot);
+    }
+    if (i == n * 2 - 1 ||
+        i != n * 2 - 1 && (points[i].x != points[i + 1].x ||
+                           points[i].type != points[i + 1].type)) {
+      unique_points.push_back(
+          {points[i].x, points[i].y, points[i].type, newRoot});
+      // cout << points[i].x << ":" << points[i].type << "\n";
     }
     points[i].root = newRoot;
     prevRoot = newRoot;
@@ -224,27 +232,26 @@ int main() {
   int x, y;
   for (int i = 0; i < m; i++) {
     cin >> x >> y;
-    int index = binarySearch(points, x);
+    int index = binarySearch(unique_points, x);
     if (index == -1) {
       cout << 0 << "\n";
     } else {
-      if (points[index].x == x && points[index].type == false) {
-        while (points[index].x == x && points[index].type == false) {
-          index--;
-        }
+      if (unique_points[index].x == x && unique_points[index].type == false) {
+        index--;
       }
       // cout << i << "- " << points[index].x << ":" << points[index].y << ":"
       //      << points[index].type << "\n";
-      cout << request(points[index].root, y) << "\n";
+      cout << request(unique_points[index].root, y) << "\n";
     }
   }
 
   // cout << "\n\nВСЕ ТОЧКИ\n\n";
-  // for (int i = 0; i < 2 * n; i++) {
+  // for (int i = 0; i < unique_points.size(); i++) {
   //   cout << "\n\n";
-  //   cout << i << "- " << points[i].x << ":" << points[i].y << ":"
-  //        << points[i].type << "\n";
-  //   debug_print_helper(points[i].root, 0);
+  //   cout << i << "- " << unique_points[i].x << ":" << unique_points[i].y <<
+  //   ":"
+  //        << unique_points[i].type << "\n";
+  //   debug_print_helper(unique_points[i].root, 0);
   //   cout << "\n\n";
   // }
 }
