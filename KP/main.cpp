@@ -175,14 +175,14 @@ int request(Node* root, int y) {
   }
 }
 
-int binarySearch(vector<Point> points, int targetX, bool targetType) {
+int binarySearch(vector<Point> points, int targetX) {
   int left = -1;
   int right = points.size();
 
   while (left + 1 < right) {
     int mid = left + (right - left) / 2;
 
-    if (points[mid].x <= targetX && (!targetType || points[mid].type)) {
+    if (points[mid].x <= targetX) {
       left = mid;
     } else {
       right = mid;
@@ -223,7 +223,12 @@ int main() {
   int x, y;
   for (int i = 0; i < m; i++) {
     cin >> x >> y;
-    int index = binarySearch(points, x, true);
+    int index = binarySearch(points, x);
+    if (points[index].x == x && points[index].type == false) {
+      while (points[index].x == x && points[index].type == false) {
+        index--;
+      }
+    }
     // cout << i << "- " << points[index].x << ":" << points[index].y << ":"
     //      << points[index].type << "\n";
     cout << request(points[index].root, y) << "\n";
