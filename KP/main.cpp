@@ -224,14 +224,18 @@ int main() {
   for (int i = 0; i < m; i++) {
     cin >> x >> y;
     int index = binarySearch(points, x);
-    if (points[index].x == x && points[index].type == false) {
-      while (points[index].x == x && points[index].type == false) {
-        index--;
+    if (index == -1) {
+      cout << 0 << "\n";
+    } else {
+      if (points[index].x == x && points[index].type == false) {
+        while (points[index].x == x && points[index].type == false) {
+          index--;
+        }
       }
+      // cout << i << "- " << points[index].x << ":" << points[index].y << ":"
+      //      << points[index].type << "\n";
+      cout << request(points[index].root, y) << "\n";
     }
-    // cout << i << "- " << points[index].x << ":" << points[index].y << ":"
-    //      << points[index].type << "\n";
-    cout << request(points[index].root, y) << "\n";
   }
 
   // cout << "\n\nВСЕ ТОЧКИ\n\n";
