@@ -10,6 +10,13 @@ struct Node {
   Node *left, *right;
 };
 
+struct Point {
+  int x;
+  int y;
+  bool type;
+  Node* root;
+};
+
 using namespace std;
 
 int Size(Node* root) {
@@ -217,13 +224,6 @@ void del(Node* root, int key, Node** newRoot) {
   }
 }
 
-struct Point {
-  int x;
-  int y;
-  bool type;
-  Node* root;
-};
-
 // int bSearch(vector<Point> a, int x) {}
 
 bool comparePoints(Point a, Point b) {
@@ -246,7 +246,7 @@ int request(Node* root, int y) {
   }
 }
 
-int binarySearch(vector<Point> points, int targetX) {
+int binarySearch(vector<Point>& points, int targetX) {
   int left = -1;
   int right = points.size();
   if (targetX < points[0].x || targetX > points[points.size() - 1].x) {
@@ -283,7 +283,6 @@ int main() {
 
   sort(points.begin(), points.end(), comparePoints);
 
-  vector<Point> unique_points;
   Node *prevRoot = NULL, *newRoot = NULL;
   for (int i = 0; i < n * 2; i++) {
     if (points[i].type == true) {
@@ -291,16 +290,24 @@ int main() {
     } else {
       del(prevRoot, points[i].y, &newRoot);
     }
-    if (i == n * 2 - 1 ||
-        i != n * 2 - 1 && (points[i].x != points[i + 1].x ||
-                           points[i].type != points[i + 1].type)) {
-      unique_points.push_back(
-          {points[i].x, points[i].y, points[i].type, newRoot});
-      // cout << points[i].x << ":" << points[i].type << "\n";
-    }
+
     points[i].root = newRoot;
     prevRoot = newRoot;
   }
+
+  vector<Point> unique_points;
+  unique_points.push_back(points[2 * n - 1]);
+  for (int i = 2 * n - 2; i >= 0; i--) {
+    if ((points[i].x != points[i + 1].x) ||
+        (points[i].type != points[i + 1].type)) {
+      unique_points.push_back(points[i]);
+    }
+  }
+  reverse(unique_points.begin(), unique_points.end());
+
+  /*for(auto i : unique_points) {
+      cout << '!' << i.x << ' ' << i.type << '\n';
+  }*/
 
   int x, y;
   for (int i = 0; i < m; i++) {
