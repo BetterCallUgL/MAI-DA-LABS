@@ -281,8 +281,7 @@ int main() {
     points.push_back({x2, y, false, NULL});
   }
 
-  sort(points.begin(), points.end(),
-       [](const Point a, const Point& b) { return a.x < b.x; });
+  sort(points.begin(), points.end(), comparePoints);
 
   vector<Point> unique_points;
   Node *prevRoot = NULL, *newRoot = NULL;
